@@ -1,0 +1,16 @@
+{
+  "name": "Socket Redis State Monorepo",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [3000, 3001],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
+  },
+  "postCreateCommand": "npm install && npm run build --workspace=packages/shared",
+  "remoteUser": "node"
+}

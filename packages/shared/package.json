@@ -1,0 +1,12 @@
+{
+  "name": "@monorepo/shared",
+  "version": "0.1.0",
+  "main": "dist/types.js",
+  "types": "dist/types.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  }
+}

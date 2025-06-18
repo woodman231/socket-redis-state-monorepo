@@ -1,0 +1,12 @@
+{
+  "name": "socket-redis-state-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/server",
+    "apps/client",
+    "packages/shared"
+  ],
+  "devDependencies": {
+    "@types/react": "^19.1.8"
+  }
+}
