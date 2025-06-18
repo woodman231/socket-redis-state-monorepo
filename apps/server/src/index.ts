@@ -25,7 +25,7 @@ function getRedisKey(socketId: string) {
 
 function getInitialState(): ClientState {
   return {
-    counter: 0,
+    counters:[],
     error: undefined
   };
 }
@@ -80,25 +80,64 @@ function getInitialState(): ClientState {
     name: "state",
     initialState: getInitialState(),
     reducers: {
-      increment(state) {
-        state.counter += 1;
-        state.error = undefined;
+      addCounter: (state, action: PayloadAction<string>) => {
+        state.counters.push({
+          name: action.payload,
+          value: 0
+        })
       },
-      decrement: (state) => {
-        if (state.counter > 0) {
-          state.counter -= 1;
+      incrementCounter(state, action: PayloadAction<number>) {
+        // The payload is the index of the counter to increment
+        const counter = state.counters[action.payload];
+        if (counter) {
+          counter.value += 1;
           state.error = undefined;
         } else {
-          state.error = "Counter cannot go below zero";
+          state.error = "Counter not found";
         }
       },
-      reset: (state) => {
-        Object.assign(state, getInitialState());
-      }
+      decrementCounter: (state, action: PayloadAction<number>) => {        
+        const counter = state.counters[action.payload];
+        if (counter) {
+          if (counter.value > 0) {
+            counter.value -= 1;
+            state.error = undefined;
+          } else {
+            state.error = "Counter cannot go below zero";
+          }
+        } else {
+          state.error = "Counter not found";
+        }
+      },
+      resetCounter: (state, action: PayloadAction<number>) => {
+        const counter = state.counters[action.payload];
+        if (counter) {
+          counter.value = 0;
+          state.error = undefined;
+        } else {
+          state.error = "Counter not found";
+        }
+      },
+      renameCounter: (state, action: PayloadAction<{ index: number, newName: string }>) => {
+        const { index, newName } = action.payload;
+        if (index >= 0 && index < state.counters.length) {
+          state.counters[index].name = newName;
+          state.error = undefined;
+        } else {
+          state.error = "Counter not found";
+        }
+      },
+      removeCounter: (state, action: PayloadAction<number>) => {
+        const index = action.payload;
+        if (index >= 0 && index < state.counters.length) {
+          state.counters.splice(index, 1);
+          state.error = undefined;
+        }
+      },      
     }
-  });
+  });  
 
-  const { increment, decrement, reset } = stateSlice.actions;
+  const actionKeys = Object.keys(stateSlice.actions);
 
   io.adapter(createAdapter(socketIOReduisPublisher, socketIORedisSubscriber));
   
@@ -109,6 +148,11 @@ function getInitialState(): ClientState {
     socket.onAny(async (event, ...args) => {
       console.log(`Socket event: ${event}`, ...args);
 
+      const excludedEvents = ["disconnect", "get_state"];
+      if (excludedEvents.includes(event)) {
+        return;
+      }
+
       const initialState: ClientState = await getState(redisKey);
       const store = configureStore({
         reducer: stateSlice.reducer,
@@ -118,12 +162,13 @@ function getInitialState(): ClientState {
       type AppDispatch = typeof store.dispatch;
       const dispatch: AppDispatch = store.dispatch;
 
-      if (event === "increment_count") {
-        dispatch(increment());
-      } else if (event === "decrement_count") {
-        dispatch(decrement());
-      } else if (event === "reset") {
-        dispatch(reset());
+      if (actionKeys.includes(event)) {
+        // @ts-ignore
+        const action = stateSlice.actions[event];
+        if (typeof action === "function") {
+          // Handle thunk actions
+          dispatch(action(...args));
+        }
       }
       else {
         console.warn(`Unhandled event: ${event}`);

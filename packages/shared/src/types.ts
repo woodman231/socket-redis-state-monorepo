@@ -1,4 +1,9 @@
+export type Counter = {
+  name: string;
+  value: number;
+}
+
 export type ClientState = {
-  counter: number;
+  counters: Counter[];
   error?: string;
 };
