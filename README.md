@@ -6,6 +6,11 @@
 - `apps/client`: React, Redux, Tailwind, Socket.io, TypeScript frontend
 - `packages/shared`: Shared TypeScript types
 
+### Add development .env file with the following content to the root of this project:
+```txt
+REDIS_SERVER=redis://redis:6379
+```
+
 ### Install & Run
 
 1. Run `npm install` at the root.
