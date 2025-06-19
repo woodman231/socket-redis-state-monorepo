@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { socket, getState } from "./socket";
 import { setState, setLoading, RootState } from "./store";
+import { CLIENT_REQUESTS } from "@monorepo/shared/src/reducers/clientStateReducer";
 
 export default function App() {
   const counters = useSelector((state: RootState) => state.counters);
@@ -23,28 +24,28 @@ export default function App() {
     const newCounterName = prompt("Enter counter name:");
     if (newCounterName) {
       dispatch(setLoading(true));
-      socket.emit("addCounter", newCounterName);
+      socket.emit(CLIENT_REQUESTS.addCounter, newCounterName);
     }
   }
 
   const handleRemoveCounter = (index: number) => {
     dispatch(setLoading(true));
-    socket.emit("removeCounter", index);
+    socket.emit(CLIENT_REQUESTS.removeCounter, index);
   };
 
   const handleIncrementCounter = (index: number) => {
     dispatch(setLoading(true));
-    socket.emit("incrementCounter", index);
+    socket.emit(CLIENT_REQUESTS.incrementCounter, index);
   };
 
   const handleDecrementCounter = (index: number) => {
     dispatch(setLoading(true));
-    socket.emit("decrementCounter", index);
+    socket.emit(CLIENT_REQUESTS.decrementCounter, index);
   };
 
   const handleResetCounter = (index: number) => {
     dispatch(setLoading(true));
-    socket.emit("resetCounter", index);
+    socket.emit(CLIENT_REQUESTS.decrementCounter, index);
   };
 
   const handleRenameCounter = (index: number) => {
